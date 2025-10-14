@@ -113,10 +113,19 @@ class UserController extends AdminController
     /**
      * Update the specified user in storage.
      */
-    //public function update(Request $request, User $user)
-    //{
-    //    // Implementation for future use
-    //}
+    public function update(Request $request, User $user)
+    {
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|string|email|max:255|unique:users,email,' . $user->id,
+            'status_id' => 'required|exists:user_statuses,id',
+        ]);
+
+        $user->update($validated);
+
+        return redirect()->route('users.index')->with('success', 'User updated successfully');
+    }
+
 
     /**
      * Remove the specified user from storage.
