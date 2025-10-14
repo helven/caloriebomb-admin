@@ -1,0 +1,50 @@
+/* Custom Light Mode Sidebar - Dark mode uses original theme */
+
+/* Only apply custom styles in LIGHT mode */
+html:not(.dark) [data-sidebar="sidebar"] {
+    @apply !bg-slate-800 !text-slate-50 !border-slate-700;
+}
+
+html:not(.dark) [data-sidebar="sidebar"] * {
+    @apply !text-slate-50;
+}
+
+html:not(.dark) [data-sidebar="sidebar"] [data-sidebar="menu-button"] {
+    @apply !bg-transparent !text-slate-50;
+}
+
+html:not(.dark) [data-sidebar="sidebar"] [data-sidebar="menu-button"]:hover {
+    @apply !bg-slate-600 !text-white;
+}
+
+/* Active/highlighted menu item */
+html:not(.dark) [data-sidebar="sidebar"] [data-sidebar="menu-button"][data-active="true"] {
+    @apply !bg-slate-600 !text-white !font-medium;
+}
+
+html:not(.dark) [data-sidebar="sidebar"] svg {
+    @apply !text-slate-50;
+}
+
+/* Sidebar wrapper background to match sidebar */
+html:not(.dark) [data-slot="sidebar-wrapper"] {
+    @apply !bg-slate-800;
+}
+
+/* Sidebar inset border radius - Change to: !rounded, !rounded-lg, !rounded-xl, !rounded-2xl */
+[data-slot="sidebar-inset"] {
+    @apply !rounded-md;
+}
+
+/* Dark mode uses the original theme - no overrides needed */
+
+/* TAILWIND COLOR OPTIONS:
+ * Blue: !bg-blue-800, hover: !bg-blue-600
+ * Purple: !bg-purple-800, hover: !bg-purple-600  
+ * Green: !bg-green-800, hover: !bg-green-600
+ * Gray: !bg-gray-800, hover: !bg-gray-600
+ * 
+ * Border radius options:
+ * !rounded-none (0px), !rounded (4px), !rounded-lg (8px), 
+ * !rounded-xl (12px), !rounded-2xl (16px), !rounded-3xl (24px)
+ */
