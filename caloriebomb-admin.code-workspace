@@ -1,0 +1,32 @@
+{
+	"folders": [
+		{
+			"path": ".",
+			"name": "MAIN DIR"
+		},
+		{
+			"path": "app",
+			"name": "app"
+		},
+		{
+			"path": "components",
+			"name": "components"
+		},
+		{
+			"path": "styles",
+			"name": "css"
+		},
+	],
+	"settings": {
+		"favorites.resources": [],
+		"favorites.sortOrder": "ASC",
+		"svn.enabled": false,
+		"svn.autorefresh": false,
+    "[php]": {
+      "editor.tabSize": 4,
+    },
+    "[html]": {
+      "editor.tabSize": 2,
+    },
+	}
+}
