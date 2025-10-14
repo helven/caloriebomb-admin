@@ -25,6 +25,7 @@ export interface NavItem {
 export interface SharedData {
     name: string;
     quote: { message: string; author: string };
+    usernameLogin: boolean;
     auth: Auth;
     sidebarOpen: boolean;
     [key: string]: unknown;
@@ -41,3 +42,17 @@ export interface User {
     updated_at: string;
     [key: string]: unknown; // This allows for additional properties...
 }
+
+export type CommonData = string | number | boolean | null | undefined | Record<string, unknown> | unknown[];
+
+export type CommonHTMLElement =
+  | HTMLDivElement
+  | HTMLSpanElement
+  | HTMLButtonElement
+  | HTMLInputElement
+  | HTMLTextAreaElement
+  | HTMLSelectElement
+  | HTMLFormElement
+  | HTMLAnchorElement
+  | HTMLImageElement
+  | HTMLElement;
