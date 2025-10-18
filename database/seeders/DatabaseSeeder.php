@@ -15,13 +15,17 @@ class DatabaseSeeder extends Seeder
     {
         // User::factory(10)->create();
 
-        User::firstOrCreate(
-            ['email' => 'test@example.com'],
-            [
-                'name' => 'Test User',
-                'password' => 'password',
-                'email_verified_at' => now(),
-            ]
-        );
+        User::factory()->create([
+            'name' => 'Adminitrator',
+            'email' => 'admin@caloriebomb.com',
+            'password' => bcrypt('admin123'), // Use bcrypt for password hashing
+        ]);
+        
+        // Call your static seeders
+        $this->call([
+            FoodCategoriesTableSeeder::class,
+            FoodsTableSeeder::class,
+            // Add other seeders as needed
+        ]);
     }
 }
