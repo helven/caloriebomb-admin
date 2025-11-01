@@ -28,7 +28,7 @@ return new class extends Migration
             $table->decimal('polyunsaturated_fat_g', 10, 3)->nullable();
             $table->decimal('cholesterol_mg', 10, 3)->nullable();
             $table->decimal('fiber_g', 10, 3)->nullable();
-            $table->datetime('created_at')->nullable();
+            $table->timestamps();
             
             // Note: No updated_at field in the original schema
             
