@@ -1,7 +1,9 @@
 FROM php:8.3-apache-bullseye
 
 RUN apt-get update \
-    && apt-get install -y libzip-dev unzip nodejs npm zlib1g-dev \
+    && apt-get install -y libzip-dev unzip zlib1g-dev curl \
+    && curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
+    && apt-get install -y nodejs \
     && docker-php-ext-install mysqli pdo pdo_mysql zip bcmath \
     && a2enmod rewrite headers
 
@@ -13,7 +15,7 @@ WORKDIR /var/www/html
 
 RUN composer install --no-dev --optimize-autoloader
 
-RUN npm ci
+RUN npm install
 
 RUN npm run build
 
