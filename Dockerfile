@@ -1,0 +1,30 @@
+FROM php:8.3-apache-bullseye
+
+RUN apt-get update \
+    && apt-get install -y libzip-dev unzip nodejs npm zlib1g-dev \
+    && docker-php-ext-install mysqli pdo pdo_mysql zip bcmath \
+    && a2enmod rewrite headers
+
+COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
+
+COPY . /var/www/html
+
+WORKDIR /var/www/html
+
+RUN composer install --no-dev --optimize-autoloader \
+    && npm ci \
+    && npm run build \
+    && php artisan config:cache \
+    && php artisan route:cache \
+    && php artisan view:cache \
+    && chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
+
+RUN { \
+    echo "log_errors = On"; \
+    echo "error_log = /dev/stderr"; \
+    echo "error_reporting = E_ALL"; \
+} > /usr/local/etc/php/conf.d/logging.ini
+
+EXPOSE 80
+
+CMD ["apache2-foreground"]
