@@ -24,10 +24,19 @@ class FoodController extends Controller
         if ($request->has('name')) {
             $query->searchByName($request->name);
         }
+        if ($request->has('search')) {
+            $query->searchByName($request->search);
+        }
 
         // Filter by category_id if provided
         if ($request->has('category_id')) {
             $query->where('category_id', $request->category_id);
+        }
+
+        if ($request->has('category_slug')) {
+            $query->whereHas('category', function($q) use ($request) {
+                $q->where('slug', $request->category_slug);
+            });
         }
 
         // Sort options
@@ -59,7 +68,7 @@ class FoodController extends Controller
 
             $total = $query->count();
 
-            if(env('APP_DEBUG', false)){
+            if(env('APP_DEBUG', true)){
                 $debug = [
                     'sql' => $query->toSql(),
                     'bindings' => $query->getBindings()
@@ -82,7 +91,7 @@ class FoodController extends Controller
             // Normal pagination
             $foods = $query->paginate($itemsPerPage);
 
-            if(env('APP_DEBUG', false)){
+            if(env('APP_DEBUG', true)){
                 $debug = [
                     'sql' => $query->toSql(),
                     'bindings' => $query->getBindings()
