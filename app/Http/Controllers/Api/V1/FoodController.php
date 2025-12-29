@@ -18,7 +18,22 @@ class FoodController extends Controller
      */
     public function index(Request $request)
     {
-        $query = Food::with('category');
+        $query = Food::select([
+            'id',
+            'name',
+            'category',
+            'category_id',
+            'energy_kj',
+            'calories_kcal',
+            'protein_g',
+            'carbohydrate_g',
+            'fat_g',
+            'saturated_fat_g',
+            'monounsaturated_fat_g',
+            'polyunsaturated_fat_g',
+            'cholesterol_mg',
+            'fiber_g'
+        ])->with('category');
 
         // Filter by name if provided
         if ($request->has('name')) {

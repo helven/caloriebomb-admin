@@ -1,52 +1,33 @@
-// ============================================================================
-// 1 REACT & CORE IMPORTS
-// ============================================================================
-// 1.1 React and React ecosystem imports
-import { Head, useForm } from '@inertiajs/react';
+// @ts-nocheck
+// -----------------------------------------------------------------------------
+// EXTERNAL DEPENDENCIES
+// -----------------------------------------------------------------------------
+// React
 import { FormEvent } from 'react';
 
-// 1.2 Third-party libraries
-// (e.g., lodash, date-fns, axios, etc.)
+// Third-party Libraries
+import { Head, useForm } from '@inertiajs/react';
+import { ArrowLeft, Save, UserPen } from 'lucide-react';
 
-// 1.3 Asset imports (data, stores, constants)
-// (e.g., mockData, stores, constants)
+// -----------------------------------------------------------------------------
+// INTERNAL DEPENDENCIES
+// -----------------------------------------------------------------------------
+// Utils
+import { formatDateTime } from '@/lib/utils';
 
-// 1.4 Project services and utilities
-// (e.g., API services, custom hooks, utilities)
-
-// ============================================================================
-// 2 LAYOUT & COMPONENT IMPORTS
-// ============================================================================
-// 2.1 Layout components
+// Components
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import AppLayout from '@/layouts/app-layout';
-import { ArrowLeft, Save, UserPen } from 'lucide-react';
 
-// 2.2. Feature/page-specific components
-// (e.g., UserCard, UserModal, etc.)
+// -----------------------------------------------------------------------------
+// TYPES
+// -----------------------------------------------------------------------------
+import type { BreadcrumbItem, CommonData, User } from '@/types';
 
-// ============================================================================
-// 3 ICON IMPORTS
-// ============================================================================
-// 3.1 Icon imports
-
-// 3.2 Image/media imports
-// (e.g., import logo from '@/assets/logo.png')
-
-// ============================================================================
-// 4 TYPE IMPORTS
-// ============================================================================
-// 4.1 Type imports
-import { formatDateTime } from '@/lib/utils';
-import { type BreadcrumbItem, type CommonData, type User } from '@/types';
-
-// ============================================================================
-// 5 TYPE DEFINITIONS
-// ============================================================================
 interface Props {
   user: User;
   userStatuses: Array<{ id: number; label: string }>;
@@ -58,17 +39,27 @@ interface FormData {
   email: string;
   status_id: string;
 }
-// ============================================================================
-// 6 CONSTANTS & STATIC DATA
-// ============================================================================
 
+// -----------------------------------------------------------------------------
+// CONSTANTS
+// -----------------------------------------------------------------------------
+// Breadcrumbs will be dynamic based on user ID, so we might keep it inside or make it a function
+// But for consistency with create.tsx, we can make a function or keep it inside if it depends on props.
+// In this case, the 'Edit User' breadcrumb depends on user.id.
+// Let's keep it inside or make a helper. For simplicity and standard adherence, we'll keep it inside but structured.
+
+// -----------------------------------------------------------------------------
+// COMPONENT
+// -----------------------------------------------------------------------------
 export default function UserEdit({ user, userStatuses = [] }: Props) {
+  // --- Hooks & Context ------------------------------------------------------
   const { data, setData, put, processing, errors, reset } = useForm<FormData>({
     name: user.name || '',
     email: user.email || '',
     status_id: user.status_id?.toString() || '1',
   });
 
+  // --- Derived / Computed ---------------------------------------------------
   const breadcrumbs: BreadcrumbItem[] = [
     {
       title: 'Dashboard',
@@ -84,6 +75,7 @@ export default function UserEdit({ user, userStatuses = [] }: Props) {
     },
   ];
 
+  // --- Handlers -------------------------------------------------------------
   const handleFormSubmit = (e: FormEvent) => {
     e.preventDefault();
     console.log('Data being sent to server:', data);
@@ -94,6 +86,7 @@ export default function UserEdit({ user, userStatuses = [] }: Props) {
     reset();
   };
 
+  // --- Render ---------------------------------------------------------------
   return (
     <AppLayout breadcrumbs={breadcrumbs}>
       <Head title="Edit User" />

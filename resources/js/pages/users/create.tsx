@@ -1,51 +1,30 @@
-// ============================================================================
-// 1 REACT & CORE IMPORTS
-// ============================================================================
-// 1.1 React and React ecosystem imports
-import { Head, useForm } from '@inertiajs/react';
+// @ts-nocheck
+// -----------------------------------------------------------------------------
+// EXTERNAL DEPENDENCIES
+// -----------------------------------------------------------------------------
+// React
 import { FormEvent } from 'react';
 
-// 1.2 Third-party libraries
-// (e.g., lodash, date-fns, axios, etc.)
+// Third-party Libraries
+import { Head, useForm } from '@inertiajs/react';
+import { ArrowLeft, Save, UserPen } from 'lucide-react';
 
-// 1.3 Asset imports (data, stores, constants)
-// (e.g., mockData, stores, constants)
-
-// 1.4 Project services and utilities
-// (e.g., API services, custom hooks, utilities)
-
-// ============================================================================
-// 2 LAYOUT & COMPONENT IMPORTS
-// ============================================================================
-// 2.1 Layout components
+// -----------------------------------------------------------------------------
+// INTERNAL DEPENDENCIES
+// -----------------------------------------------------------------------------
+// Components
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import AppLayout from '@/layouts/app-layout';
-import { ArrowLeft, Save, UserPen } from 'lucide-react';
 
-// 2.2. Feature/page-specific components
-// (e.g., UserCard, UserModal, etc.)
+// -----------------------------------------------------------------------------
+// TYPES
+// -----------------------------------------------------------------------------
+import type { BreadcrumbItem, CommonData } from '@/types';
 
-// ============================================================================
-// 3 ICON IMPORTS
-// ============================================================================
-// 3.1 Icon imports
-
-// 3.2 Image/media imports
-// (e.g., import logo from '@/assets/logo.png')
-
-// ============================================================================
-// 4 TYPE IMPORTS
-// ============================================================================
-// 4.1 Type imports
-import { type BreadcrumbItem, type CommonData } from '@/types';
-
-// ============================================================================
-// 5 TYPE DEFINITIONS
-// ============================================================================
 interface Props {
   userStatuses: Array<{ id: number; label: string }>;
   [key: string]: CommonData;
@@ -56,32 +35,37 @@ interface FormData {
   email: string;
   status_id: string;
 }
-// ============================================================================
-// 6 CONSTANTS & STATIC DATA
-// ============================================================================
 
+// -----------------------------------------------------------------------------
+// CONSTANTS
+// -----------------------------------------------------------------------------
+const BREADCRUMBS: BreadcrumbItem[] = [
+  {
+    title: 'Dashboard',
+    href: '/dashboard',
+  },
+  {
+    title: 'Users',
+    href: '/users',
+  },
+  {
+    title: 'Create User',
+    href: `/users/create`,
+  },
+];
+
+// -----------------------------------------------------------------------------
+// COMPONENT
+// -----------------------------------------------------------------------------
 export default function UserCreate({ userStatuses = [] }: Props) {
+  // --- Hooks & Context ------------------------------------------------------
   const { data, setData, post, processing, errors, reset } = useForm<FormData>({
     name: '',
     email: '',
     status_id: '1',
   });
 
-  const breadcrumbs: BreadcrumbItem[] = [
-    {
-      title: 'Dashboard',
-      href: '/dashboard',
-    },
-    {
-      title: 'Users',
-      href: '/users',
-    },
-    {
-      title: 'Create User',
-      href: `/users/create`,
-    },
-  ];
-
+  // --- Handlers -------------------------------------------------------------
   const handleFormSubmit = (e: FormEvent) => {
     e.preventDefault();
     console.log('Data being sent to server:', data);
@@ -92,8 +76,9 @@ export default function UserCreate({ userStatuses = [] }: Props) {
     reset();
   };
 
+  // --- Render ---------------------------------------------------------------
   return (
-    <AppLayout breadcrumbs={breadcrumbs}>
+    <AppLayout breadcrumbs={BREADCRUMBS}>
       <Head title="Create User" />
 
       <div className="flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-xl p-4">

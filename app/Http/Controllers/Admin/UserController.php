@@ -73,9 +73,9 @@ class UserController extends AdminController
         User::create([
             'name' => $validated['name'],
             'email' => $validated['email'],
-            'username' => $validated['username'], // Use email as username
+            'username' => $validated['email'], // Use email as username
             'status_id' => $validated['status_id'],
-            //'password' => bcrypt('password'), // Default password
+            'password' => bcrypt('password'), // Default password
         ]);
 
         return redirect()->route('users.index')->with('success', 'User created successfully');

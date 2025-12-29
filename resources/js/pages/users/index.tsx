@@ -1,23 +1,20 @@
-// ============================================================================
-// 1 REACT & CORE IMPORTS
-// ============================================================================
-// 1.1 React and React ecosystem imports
+// -----------------------------------------------------------------------------
+// EXTERNAL DEPENDENCIES
+// -----------------------------------------------------------------------------
+// React
+import { useEffect, useMemo, useState } from 'react';
+
+// Third-party Libraries
 import { Head, Link, router, usePage } from '@inertiajs/react';
-import { useEffect, useState } from 'react';
+import { Search, Users } from 'lucide-react';
 
-// 1.2 Third-party libraries
-// (e.g., lodash, date-fns, axios, etc.)
+// -----------------------------------------------------------------------------
+// INTERNAL DEPENDENCIES
+// -----------------------------------------------------------------------------
+// Utils
+import { formatDateTime } from '@/lib/utils';
 
-// 1.3 Asset imports (data, stores, constants)
-// (e.g., mockData, stores, constants)
-
-// 1.4 Project services and utilities
-// (e.g., API services, custom hooks, utilities)
-
-// ============================================================================
-// 2 LAYOUT & COMPONENT IMPORTS
-// ============================================================================
-// 2.1 Layout components
+// Components
 import { ActionPopover } from '@/components/ActionPopover';
 import { CheckboxListFilter } from '@/components/CheckboxListFilter';
 import { Button } from '@/components/ui/button';
@@ -26,30 +23,12 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import AppLayout from '@/layouts/app-layout';
-import { Search } from 'lucide-react';
 
-// 2.2. Feature/page-specific components
-// (e.g., UserCard, UserModal, etc.)
+// -----------------------------------------------------------------------------
+// TYPES
+// -----------------------------------------------------------------------------
+import type { BreadcrumbItem, CommonData, User } from '@/types';
 
-// ============================================================================
-// 3 ICON IMPORTS
-// ============================================================================
-// 3.1 Icon imports
-import { Users } from 'lucide-react';
-
-// 3.2 Image/media imports
-// (e.g., import logo from '@/assets/logo.png')
-
-// ============================================================================
-// 4 TYPE IMPORTS
-// ============================================================================
-// 4.1 Type imports
-import { formatDateTime } from '@/lib/utils';
-import { type BreadcrumbItem, type CommonData, type User } from '@/types';
-
-// ============================================================================
-// 5 TYPE DEFINITIONS
-// ============================================================================
 interface UserStatus {
   id: number;
   label: string;
@@ -72,10 +51,13 @@ interface Props {
   [key: string]: CommonData;
 }
 
-// ============================================================================
-// 6 CONSTANTS & STATIC DATA
-// ============================================================================
-const breadcrumbs: BreadcrumbItem[] = [
+// -----------------------------------------------------------------------------
+// CONSTANTS
+// -----------------------------------------------------------------------------
+const DEBOUNCE_DELAY = 500;
+const DEFAULT_PER_PAGE = '15';
+
+const BREADCRUMBS: BreadcrumbItem[] = [
   {
     title: 'Dashboard',
     href: '/dashboard',
@@ -86,63 +68,68 @@ const breadcrumbs: BreadcrumbItem[] = [
   },
 ];
 
-export default function UserIndex({ users, userStatuses }: Props) {
-  // ============================================================================
-  // 1 CONSTANTS & STATIC DATA
-  // ============================================================================
-  const DEBOUNCE_DELAY = 500;
-  const DEFAULT_PER_PAGE = '15';
+// -----------------------------------------------------------------------------
+// COMPONENT
+// -----------------------------------------------------------------------------
+function UserIndex({ users, userStatuses }: Props) {
+  // --- Hooks & Context ------------------------------------------------------
   const { url } = usePage();
-  const urlParams = new URLSearchParams(url.split('?')[1] || '');
 
-  // ============================================================================
-  // 2 STATE DECLARATIONS
-  // ============================================================================
+  // --- URL State ------------------------------------------------------------
+  // Memoize urlParams to prevent unnecessary recalculations if url object reference changes
+  const urlParams = useMemo(() => new URLSearchParams(url.split('?')[1] || ''), [url]);
+
+  // --- Local State ----------------------------------------------------------
   const [search, setSearch] = useState<string>(urlParams.get('search') || '');
-  const [selectedUserStatuses, setSelectedUserStatuses] = useState<string[]>(urlParams.get('status') ? urlParams.get('status')!.split(',') : []);
+  const [selectedUserStatuses, setSelectedUserStatuses] = useState<string[]>(
+    urlParams.get('status') ? urlParams.get('status')!.split(',') : []
+  );
   const [selectedUsers, setSelectedUsers] = useState<number[]>([]);
 
-  // ============================================================================
-  // 3 DERIVED DATA & COMPUTED VALUES
-  // ============================================================================
-  const statusListItem = userStatuses.map((status: UserStatus) => {
-    return {
+  // --- Derived / Computed ---------------------------------------------------
+  const statusListItem = useMemo(() => {
+    return userStatuses.map((status: UserStatus) => ({
       value: status.id.toString(),
       label: status.label,
       count: status.users_count || 0,
-    };
-  });
+    }));
+  }, [userStatuses]);
 
   const allUsersSelected = users.data.length > 0 && selectedUsers.length === users.data.length;
   const someUsersSelected = selectedUsers.length > 0 && selectedUsers.length < users.data.length;
 
-  // ============================================================================
-  // 4 UTILITY FUNCTIONS
-  // ============================================================================
-  const clearFilters = () => {
+  // --- Effects --------------------------------------------------------------
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      const params: Record<string, any> = {};
+
+      if (search.trim()) params.search = search.trim();
+      if (selectedUserStatuses.length > 0) params.status_id = selectedUserStatuses.join(',');
+
+      router.get('/users', params, {
+        preserveState: true,
+        preserveScroll: false,
+        replace: true,
+      });
+    }, DEBOUNCE_DELAY);
+
+    return () => clearTimeout(timeoutId);
+  }, [search, selectedUserStatuses]);
+
+  // --- Handlers -------------------------------------------------------------
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearch(e.target.value);
+  };
+
+  const handleClearFilters = () => {
     setSearch('');
     setSelectedUserStatuses([]);
   };
 
-  const getSelectAllCheckboxState = () => {
-    const allSelected = users.data.length > 0 && selectedUsers.length === users.data.length;
-    const someSelected = selectedUsers.length > 0 && selectedUsers.length < users.data.length;
-    return allSelected ? true : someSelected ? 'indeterminate' : false;
-  };
-
-  // ============================================================================
-  // 5 EVENT HANDLERS
-  // ============================================================================
-  const handleClearFiltersButtonClick = () => {
-    clearFilters();
-  };
-
   const handleSelectAllCheckboxChange = () => {
     if (allUsersSelected) {
-      // Unselect all if all are selected
       setSelectedUsers([]);
     } else {
-      // else select remaining that are not selected
       setSelectedUsers(users.data.map((user) => user.id));
     }
   };
@@ -150,40 +137,31 @@ export default function UserIndex({ users, userStatuses }: Props) {
   const handleRowCheckboxChange = (userId: number) => {
     setSelectedUsers((prev) => {
       if (prev.includes(userId)) {
-        return prev.filter((id) => id !== userId); // remove from selected Users (Loop through the prev array. For each id in the array, if id is NOT equal to userId, keep it in the new array. If id equals userId, exclude it bye bye)
+        return prev.filter((id) => id !== userId);
       } else {
-        return [...prev, userId]; // add to selected Users
+        return [...prev, userId];
       }
     });
   };
 
-  // ============================================================================
-  // 6 EFFECTS & SIDE EFFECTS
-  // ============================================================================
-  // Update URL when filters change
-  useEffect(() => {
-    const timeoutId = setTimeout(() => {
-      const params: Record<string, any> = {};
+  const handlePerPageChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    router.get(
+      '/users',
+      {
+        ...Object.fromEntries(urlParams),
+        per_page: e.target.value,
+        page: '1',
+      },
+      {
+        preserveState: true,
+        preserveScroll: true,
+      }
+    );
+  };
 
-      // Set URL params with filter
-      if (search.trim()) params.search = search.trim();
-      if (selectedUserStatuses.length > 0) params.status_id = selectedUserStatuses.join(',');
-
-      // Send AJAX request to Laravel with filter params, update URL
-      router.get('/users', params, {
-        preserveState: true, // preserve component state
-        preserveScroll: false, // scroll to top (user want to see the top of the page after filter)
-        replace: true, // replace history entry (do not append browsing history)
-      });
-    }, DEBOUNCE_DELAY);
-    return () => clearTimeout(timeoutId);
-  }, [search, selectedUserStatuses]);
-
-  // ============================================================================
-  // 7 RENDER
-  // ============================================================================
+  // --- Render ---------------------------------------------------------------
   return (
-    <AppLayout breadcrumbs={breadcrumbs}>
+    <AppLayout breadcrumbs={BREADCRUMBS}>
       <Head title="Users" />
 
       <div className="flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-xl p-4">
@@ -214,17 +192,22 @@ export default function UserIndex({ users, userStatuses }: Props) {
                   placeholder="Search users..."
                   className="bg-background pr-10"
                   value={search}
-                  onChange={(e) => setSearch(e.target.value)}
+                  onChange={handleSearchChange}
                 />
                 <Search className="absolute top-1/2 right-3 h-4 w-4 -translate-y-1/2 transform text-muted-foreground" />
               </div>
 
               <div className="flex w-full justify-start lg:w-auto">
-                <CheckboxListFilter listItems={statusListItem} label="Status" values={selectedUserStatuses} onChange={setSelectedUserStatuses} />
+                <CheckboxListFilter
+                  listItems={statusListItem}
+                  label="Status"
+                  values={selectedUserStatuses}
+                  onChange={setSelectedUserStatuses}
+                />
               </div>
 
               <div className="flex w-full justify-center lg:ml-auto lg:w-auto">
-                <Button variant="outline" className="bg-primary text-primary-foreground" onClick={handleClearFiltersButtonClick}>
+                <Button variant="outline" className="bg-primary text-primary-foreground" onClick={handleClearFilters}>
                   Clear Filters
                 </Button>
               </div>
@@ -256,7 +239,10 @@ export default function UserIndex({ users, userStatuses }: Props) {
               {users.data.map((user) => (
                 <TableRow key={user.id}>
                   <TableCell>
-                    <Checkbox checked={selectedUsers.includes(user.id)} onCheckedChange={() => handleRowCheckboxChange(user.id)} />
+                    <Checkbox
+                      checked={selectedUsers.includes(user.id)}
+                      onCheckedChange={() => handleRowCheckboxChange(user.id)}
+                    />
                   </TableCell>
                   <TableCell>
                     <div className="font-mono text-sm">{user.id}</div>
@@ -318,26 +304,8 @@ export default function UserIndex({ users, userStatuses }: Props) {
             <div className="flex items-center gap-2">
               <select
                 className="rounded-md border bg-background px-3 py-1 text-sm"
-                value={urlParams.get('per_page') || DEFAULT_PER_PAGE.toString()}
-                onChange={(e) => {
-                  router.get(
-                    '/users',
-                    {
-                      ...Object.fromEntries(urlParams),
-                      per_page: e.target.value,
-                      page: '1',
-                    },
-                    {
-                      preserveState: true,
-                      preserveScroll: true,
-                    },
-                  );
-
-                  //const url = new URL(window.location.href);
-                  //urlParams.set('per_page', e.target.value);
-                  //urlParams.set('page', '1'); // Reset to page 1
-                  //window.location.href = url.toString();
-                }}
+                value={urlParams.get('per_page') || DEFAULT_PER_PAGE}
+                onChange={handlePerPageChange}
               >
                 <option value="10">10</option>
                 <option value="15">15</option>
@@ -391,3 +359,5 @@ export default function UserIndex({ users, userStatuses }: Props) {
     </AppLayout>
   );
 }
+
+export default UserIndex;
